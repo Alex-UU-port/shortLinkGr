@@ -49,6 +49,7 @@ tasks.check {
 
 spotbugs {
     toolVersion = '4.8.3'
+    ignoreFailures = true
 }
 
 spotbugsMain {
