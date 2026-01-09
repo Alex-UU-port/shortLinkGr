@@ -21,7 +21,7 @@ env:
 jobs:
 
   # ============================================================
-  # JOB 1: Сборка и тестирование (CI)
+  # JOB: Сборка и тестирование (CI)
   # ============================================================
   build-and-test:
     # Имя job'а (видно в UI)
@@ -87,67 +87,3 @@ jobs:
         with:
           name: app-jar
           path: build/libs/*.jar
-
-  # ============================================================
-  # JOB 2: DEPLOY
-  # ============================================================
-  deploy:
-    # Имя job'а
-    name: Deploy to Windows Server
-
-    # Job запустится ТОЛЬКО если build-and-test прошёл успешно
-    needs: build-and-test
-
-    # Запуск на self-hosted runner
-    # runner должен иметь эти labels
-    runs-on: [ self-hosted, windows, prod ]
-
-    steps:
-      # --------------------------------------------------
-      # Шаг 1: Скачивание артефакта
-      # --------------------------------------------------
-      - name: Download JAR artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: app-jar
-          path: artifact
-
-      # --------------------------------------------------
-      # Шаг 2: Остановка запущенного приложения
-      # --------------------------------------------------
-
-      - name: Stop application
-        run: |
-          echo "Stopping application..."
-          powershell -Command "
-            Get-Process java -ErrorAction SilentlyContinue |
-            Stop-Process -Force
-          "
-
-      # --------------------------------------------------
-      # Шаг 3: Копирование JAR в папку деплоя
-      # --------------------------------------------------
-      - name: Deploy JAR
-        run: |
-          echo "Deploying JAR..."
-
-          # Создаём папку приложения, если её нет
-          if (!(Test-Path 'C:\apps\${{ env.APP_NAME }}')) {
-            New-Item -ItemType Directory -Path 'C:\apps\${{ env.APP_NAME }}'
-          }
-
-          # Копируем jar с заменой
-          Copy-Item artifact\*.jar `
-            C:\apps\${{ env.APP_NAME }}\${{ env.JAR_NAME }} `
-            -Force
-
-      # --------------------------------------------------
-      # Шаг 4: Запуск приложения
-      # --------------------------------------------------
-      - name: Start application
-        run: |
-          echo "Starting application..."
-          Start-Process java `
-            -ArgumentList "-jar C:\apps\${{ env.APP_NAME }}\${{ env.JAR_NAME }}" `
-            -WorkingDirectory "C:\apps\${{ env.APP_NAME }}" `
-            -WindowStyle Hidden
