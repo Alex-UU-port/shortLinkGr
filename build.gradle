@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'application'
     id 'checkstyle'
+    id 'com.github.spotbugs' version '6.0.18'
 }
 
 group = 'alexuuport'
@@ -44,4 +45,22 @@ checkstyle {
 tasks.check {
     dependsOn tasks.checkstyleMain
     dependsOn tasks.checkstyleTest
+}
+
+spotbugs {
+    toolVersion = '4.8.3'
+}
+
+spotbugsMain {
+    reports {
+        html.required = true
+        xml.required = false
+    }
+}
+
+tasks.withType(Checkstyle).configureEach {
+    reports {
+        xml.required = true
+        html.required = true
+    }
 }
