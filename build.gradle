@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'application'
+    id 'checkstyle'
 }
 
 group = 'alexuuport'
@@ -33,4 +34,14 @@ test {
 
 application {
     mainClass = 'alexuuport.Main'
+}
+
+checkstyle {
+    toolVersion = '10.12.1'
+    configFile = file('config/checkstyle/checkstyle.xml')
+}
+
+tasks.check {
+    dependsOn tasks.checkstyleMain
+    dependsOn tasks.checkstyleTest
 }
